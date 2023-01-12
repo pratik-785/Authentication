@@ -11,8 +11,18 @@ import {
 } from 'react-native';
 
 import { AuthContext } from '../../Navigations/AuthProvider';
-
 import Ionicons from 'react-native-vector-icons/Ionicons';
+
+import * as Yup from 'yup';
+import { Formik } from 'formik';
+
+const loginValidationSchema = Yup.object().shape({
+    email: Yup.string().email("Please enter valid email").required('Email Address is required'),
+    password: Yup.string()
+        .min(6)
+        .required('Password is required')
+    // .matches(/ ^[A-Z]+$/, 'Must contain 6 characters, at least one uppercase letter')
+});
 
 const SignUpScreen = ({ navigation }) => {
     const [email, setEmail] = useState("");
@@ -80,13 +90,13 @@ const SignUpScreen = ({ navigation }) => {
                 {/* Sign up button */}
                 {email == "" && password == "" ?
                     <TouchableOpacity activeOpacity={0.5} style={[styles.signInButton, { backgroundColor: 'red', opacity: 0.5 }]}>
-                        <Text style={{ color: '#fff', fontWeight: '700' }}>Login</Text>
+                        <Text style={{ color: '#fff', fontWeight: '700' }}>Sign Up</Text>
                     </TouchableOpacity>
                     :
                     <TouchableOpacity
                         onPress={() => handleLogin()}
                         style={styles.signInButton}>
-                        <Text style={{ color: '#fff', fontWeight: '700' }}>Login</Text>
+                        <Text style={{ color: '#fff', fontWeight: '700' }}>Sign Up</Text>
                     </TouchableOpacity>}
 
                 {/* Already have account Login In */}

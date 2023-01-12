@@ -5,6 +5,7 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
+    console.log(user)
 
     return (
         <AuthContext.Provider
@@ -12,8 +13,10 @@ export const AuthProvider = ({ children }) => {
                 user,
                 setUser,
                 login: async (email, password) => {
+                    console.log('email>>>>>>>>>>>>>>>>>>', email.email)
+                    console.log('passsss>>>>>>>>>>>>>>>>>>', password.password)
                     try {
-                        await auth().signInWithEmailAndPassword(email, password)
+                        await auth().signInWithEmailAndPassword(email.email, password.password)
                     } catch (e) {
                         console.log(e)
                     }
