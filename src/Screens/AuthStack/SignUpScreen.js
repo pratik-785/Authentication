@@ -8,6 +8,7 @@ import {
     Image,
     TouchableOpacity,
     Alert,
+    ActivityIndicator,
 } from 'react-native';
 
 import { AuthContext } from '../../Navigations/AuthProvider';
@@ -17,72 +18,94 @@ import * as Yup from 'yup';
 import { Formik } from 'formik';
 
 const loginValidationSchema = Yup.object().shape({
-    email: Yup.string().email("Please enter valid email").required('Email Address is required'),
+    name: Yup.string()
+        .min(4, `It's too short`)
+        // .name("Please enter your name")
+        .required('Name is required')
+    ,
+    email: Yup.string()
+        .email("Please enter valid email")
+        .required('Email Address is required'),
+
     password: Yup.string()
         .min(6)
-        .required('Password is required')
-    // .matches(/ ^[A-Z]+$/, 'Must contain 6 characters, at least one uppercase letter')
+        .required('Password is required'),
+    // .matches(/^[A-Z]+$/, 'Must contain 6 characters, atleast one uppercase letter'),
+
+    confirmPassword: Yup.string()
+        .min(6, 'Confirm Password must be 6 characters.')
+        .oneOf([Yup.ref('password')], "Your password do not matched.")
+        .required('Confirm password is required')
 });
 
 const SignUpScreen = ({ navigation }) => {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState('');
-    const [secure, setSecure] = useState(true)
-    const [error, setError] = useState('');
-
-    const { register } = useContext(AuthContext)
-
-    const handleLogin = () => {
-        if (password.length < 4) {
-            setError('Password length must be 5 and above')
-        }
-        else {
-            register(email, password)
-        }
-    }
+    const [secure, setSecure] = useState(true);
+    const [secureConfirmPass, setSecureConfirmPass] = useState(true);
+    const { register } = useContext(AuthContext);
 
     return (
         <Formik initialValues={{
+            name: '',
             email: '',
             password: '',
+            confirmPassword: ''
         }}
             validationSchema={loginValidationSchema}
-            onSubmit={values => login({ email: (values.email) }, { password: (values.password) })}
+            onSubmit={values => register({ email: (values.email) }, { password: (values.password) })}
         >
             {({ values, errors, touched, handleSubmit, handleChange, isValid, setFieldTouched }) => (
                 <ImageBackground source={require('../../Assets/background.jpg')} style={styles.mainContainer}>
                     <View style={styles.innerContainer}>
-                        <View style={{ marginTop: 60 }}>
+                        <View style={{ marginTop: 50 }}>
                             <Text style={{ fontSize: 26, color: '#fff', fontWeight: '800' }}>Sign Up</Text>
                         </View>
 
-                        <View style={{ marginTop: 40 }}>
+                        {/* Name Input */}
+                        <View style={{ marginTop: 30 }}>
                             <TextInput
                                 autoCapitalize="none"
                                 autoCorrect={false}
-                                labelValue={email}
-                                placeholder="Email or Phone Number"
+                                labelValue={values.name}
+                                placeholder="Enter your name"
                                 keyboardShouldPersistTaps={false}
-                                value={email}
-                                onChangeText={(e) => {
-                                    setEmail(e)
-                                }}
+                                onChangeText={handleChange('name')}
+                                onBlur={() => setFieldTouched('name')}
                                 style={styles.emailInput}
                             />
+                            {touched.name && errors.name && (<Text style={{ color: 'red', fontWeight: '800' }}>{errors.name}</Text>)}
+
                         </View>
 
-                        {/* Password input */}
-                        <View style={[styles.passwordContainer, { borderBottomColor: error ? 'red' : null, borderBottomWidth: error ? 2 : null, }]}>
+                        {/* Email Input */}
+                        <View style={{ marginTop: 15, }}>
                             <TextInput
                                 autoCapitalize="none"
                                 autoCorrect={false}
-                                labelValue={password}
-                                secureTextEntry={secure ? true : false}
-                                placeholder="Password"
-                                style={styles.passwordInput}
-                                value={password}
-                                onChangeText={e => setPassword(e)}
+                                labelValue={values.email}
+                                placeholder="Email or Phone Number"
+                                keyboardShouldPersistTaps={false}
+                                onChangeText={handleChange('email')}
+                                onBlur={() => setFieldTouched('email')}
+                                style={styles.emailInput}
                             />
+                            {touched.email && errors.email && (<Text style={{ color: 'red', fontWeight: '800' }}>{errors.email}</Text>)}
+
+                        </View>
+
+                        {/* Password Input */}
+                        <View style={styles.passwordContainer}>
+                            <TextInput
+                                autoCapitalize="none"
+                                autoCorrect={false}
+                                secureTextEntry={secure ? true : false}
+                                labelValue={values.password}
+                                placeholder="Password"
+                                keyboardShouldPersistTaps={false}
+                                onChangeText={handleChange('password')}
+                                onBlur={() => setFieldTouched('password')}
+                                style={styles.passwordInput}
+                            />
+
                             <View style={styles.eyeIcon}>
                                 <TouchableOpacity onPress={() => setSecure(!secure)} >
                                     {secure ?
@@ -93,22 +116,47 @@ const SignUpScreen = ({ navigation }) => {
                                 </TouchableOpacity>
                             </View>
                         </View>
-                        <Text style={{ fontSize: 13, color: '#fff', fontWeight: '800' }}>{error}</Text>
+                        {touched.password && errors.password && (<Text style={{ color: 'red', fontWeight: '800' }}>{errors.password}</Text>)}
+
+                        {/* Confirm Password Input */}
+                        <View style={styles.passwordContainer}>
+                            <TextInput
+                                autoCapitalize="none"
+                                autoCorrect={false}
+                                secureTextEntry={secureConfirmPass ? true : false}
+                                labelValue={values.confirmPassword}
+                                placeholder="Confirm Password"
+                                keyboardShouldPersistTaps={false}
+                                onChangeText={handleChange('confirmPassword')}
+                                onBlur={() => setFieldTouched('confirmPassword')}
+                                style={styles.passwordInput}
+                            />
+
+                            <View style={styles.eyeIcon}>
+                                <TouchableOpacity onPress={() => setSecureConfirmPass(!secureConfirmPass)} >
+                                    {secureConfirmPass ?
+                                        <Ionicons name="md-eye-off-outline" size={20} />
+                                        :
+                                        <Ionicons name="md-eye-outline" size={20} />
+                                    }
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                        {/* Show error If password not matched */}
+                        {touched.confirmPassword && errors.confirmPassword && (<Text style={{ color: 'red', fontWeight: '800' }}>{errors.confirmPassword}</Text>)}
+
 
                         {/* Sign up button */}
-                        {email == "" && password == "" ?
-                            <TouchableOpacity activeOpacity={0.5} style={[styles.signInButton, { backgroundColor: 'red', opacity: 0.5 }]}>
-                                <Text style={{ color: '#fff', fontWeight: '700' }}>Sign Up</Text>
-                            </TouchableOpacity>
-                            :
-                            <TouchableOpacity
-                                onPress={() => handleLogin()}
-                                style={styles.signInButton}>
-                                <Text style={{ color: '#fff', fontWeight: '700' }}>Sign Up</Text>
-                            </TouchableOpacity>}
+                        <TouchableOpacity
+                            onPress={handleSubmit}
+                            disabled={!isValid}
+                            style={[styles.signInButton, { opacity: isValid ? 1 : 0.6 }]}>
+                            {/* <ActivityIndicator size={20} color={'#fff'} /> */}
+                            <Text style={{ color: '#fff', fontWeight: '700' }}>Sign Up</Text>
+                        </TouchableOpacity>
 
                         {/* Already have account Login In */}
-                        <View style={{ marginVertical: 20, flexDirection: 'row' }}>
+                        <View style={{ marginVertical: 10, flexDirection: 'row' }}>
                             <Text style={{ color: '#fff', fontWeight: '700', marginRight: 5 }}>
                                 Already on App?
                             </Text>
@@ -132,7 +180,7 @@ const styles = StyleSheet.create({
         alignItems: 'center', height: '100%', width: '100%'
     },
     innerContainer: {
-        height: 500,
+        height: 520,
         width: 300,
         backgroundColor: '#222',
         // justifyContent: 'center',
