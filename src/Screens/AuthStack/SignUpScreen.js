@@ -42,74 +42,84 @@ const SignUpScreen = ({ navigation }) => {
     }
 
     return (
-        <ImageBackground source={require('../../Assets/background.jpg')} style={styles.mainContainer}>
-            <View style={styles.innerContainer}>
-                <View style={{ marginTop: 60 }}>
-                    <Text style={{ fontSize: 26, color: '#fff', fontWeight: '800' }}>Sign Up</Text>
-                </View>
+        <Formik initialValues={{
+            email: '',
+            password: '',
+        }}
+            validationSchema={loginValidationSchema}
+            onSubmit={values => login({ email: (values.email) }, { password: (values.password) })}
+        >
+            {({ values, errors, touched, handleSubmit, handleChange, isValid, setFieldTouched }) => (
+                <ImageBackground source={require('../../Assets/background.jpg')} style={styles.mainContainer}>
+                    <View style={styles.innerContainer}>
+                        <View style={{ marginTop: 60 }}>
+                            <Text style={{ fontSize: 26, color: '#fff', fontWeight: '800' }}>Sign Up</Text>
+                        </View>
 
-                <View style={{ marginTop: 40 }}>
-                    <TextInput
-                        autoCapitalize="none"
-                        autoCorrect={false}
-                        labelValue={email}
-                        placeholder="Email or Phone Number"
-                        keyboardShouldPersistTaps={false}
-                        value={email}
-                        onChangeText={(e) => {
-                            setEmail(e)
-                        }}
-                        style={styles.emailInput}
-                    />
-                </View>
+                        <View style={{ marginTop: 40 }}>
+                            <TextInput
+                                autoCapitalize="none"
+                                autoCorrect={false}
+                                labelValue={email}
+                                placeholder="Email or Phone Number"
+                                keyboardShouldPersistTaps={false}
+                                value={email}
+                                onChangeText={(e) => {
+                                    setEmail(e)
+                                }}
+                                style={styles.emailInput}
+                            />
+                        </View>
 
-                {/* Password input */}
-                <View style={[styles.passwordContainer, { borderBottomColor: error ? 'red' : null, borderBottomWidth: error ? 2 : null, }]}>
-                    <TextInput
-                        autoCapitalize="none"
-                        autoCorrect={false}
-                        labelValue={password}
-                        secureTextEntry={secure ? true : false}
-                        placeholder="Password"
-                        style={styles.passwordInput}
-                        value={password}
-                        onChangeText={e => setPassword(e)}
-                    />
-                    <View style={styles.eyeIcon}>
-                        <TouchableOpacity onPress={() => setSecure(!secure)} >
-                            {secure ?
-                                <Ionicons name="md-eye-off-outline" size={20} />
-                                :
-                                <Ionicons name="md-eye-outline" size={20} />
-                            }
-                        </TouchableOpacity>
+                        {/* Password input */}
+                        <View style={[styles.passwordContainer, { borderBottomColor: error ? 'red' : null, borderBottomWidth: error ? 2 : null, }]}>
+                            <TextInput
+                                autoCapitalize="none"
+                                autoCorrect={false}
+                                labelValue={password}
+                                secureTextEntry={secure ? true : false}
+                                placeholder="Password"
+                                style={styles.passwordInput}
+                                value={password}
+                                onChangeText={e => setPassword(e)}
+                            />
+                            <View style={styles.eyeIcon}>
+                                <TouchableOpacity onPress={() => setSecure(!secure)} >
+                                    {secure ?
+                                        <Ionicons name="md-eye-off-outline" size={20} />
+                                        :
+                                        <Ionicons name="md-eye-outline" size={20} />
+                                    }
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                        <Text style={{ fontSize: 13, color: '#fff', fontWeight: '800' }}>{error}</Text>
+
+                        {/* Sign up button */}
+                        {email == "" && password == "" ?
+                            <TouchableOpacity activeOpacity={0.5} style={[styles.signInButton, { backgroundColor: 'red', opacity: 0.5 }]}>
+                                <Text style={{ color: '#fff', fontWeight: '700' }}>Sign Up</Text>
+                            </TouchableOpacity>
+                            :
+                            <TouchableOpacity
+                                onPress={() => handleLogin()}
+                                style={styles.signInButton}>
+                                <Text style={{ color: '#fff', fontWeight: '700' }}>Sign Up</Text>
+                            </TouchableOpacity>}
+
+                        {/* Already have account Login In */}
+                        <View style={{ marginVertical: 20, flexDirection: 'row' }}>
+                            <Text style={{ color: '#fff', fontWeight: '700', marginRight: 5 }}>
+                                Already on App?
+                            </Text>
+                            <TouchableOpacity onPress={() => navigation.navigate('LoginScreen')}>
+                                <Text style={{ color: 'red', fontWeight: '700', textDecorationLine: 'underline', }}>Log In</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
-                </View>
-                <Text style={{ fontSize: 13, color: '#fff', fontWeight: '800' }}>{error}</Text>
-
-                {/* Sign up button */}
-                {email == "" && password == "" ?
-                    <TouchableOpacity activeOpacity={0.5} style={[styles.signInButton, { backgroundColor: 'red', opacity: 0.5 }]}>
-                        <Text style={{ color: '#fff', fontWeight: '700' }}>Sign Up</Text>
-                    </TouchableOpacity>
-                    :
-                    <TouchableOpacity
-                        onPress={() => handleLogin()}
-                        style={styles.signInButton}>
-                        <Text style={{ color: '#fff', fontWeight: '700' }}>Sign Up</Text>
-                    </TouchableOpacity>}
-
-                {/* Already have account Login In */}
-                <View style={{ marginVertical: 20, flexDirection: 'row' }}>
-                    <Text style={{ color: '#fff', fontWeight: '700', marginRight: 5 }}>
-                        Already on App?
-                    </Text>
-                    <TouchableOpacity onPress={() => navigation.navigate('LoginScreen')}>
-                        <Text style={{ color: 'red', fontWeight: '700', textDecorationLine: 'underline', }}>Log In</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-        </ImageBackground>
+                </ImageBackground>
+            )}
+        </Formik>
     );
 };
 
